@@ -1,0 +1,217 @@
+Database Query
+
+user:-
+CREATE TABLE jelwo.user ( 
+ UserID INT NOT NULL AUTO_INCREMENT, 
+ FirstName VARCHAR(45) NOT NULL, 
+ LastName VARCHAR(45) NOT NULL, 
+ Email VARCHAR(100) NOT NULL, 
+ Password VARCHAR(255) NOT NULL, 
+ Createdat TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
+ PRIMARY KEY (UserID), 
+ UNIQUE INDEX Email_UNIQUE (Email ASC) VISIBLE);
+
+addresses:-
+CREATE TABLE address (
+  AddressID INT AUTO_INCREMENT PRIMARY KEY,
+  UserID INT NOT NULL,
+
+  FirstName VARCHAR(100),
+  LastName VARCHAR(100),
+  Company VARCHAR(150),
+
+  Address1 TEXT NOT NULL,
+  Address2 TEXT,
+
+  City VARCHAR(100),
+  Country VARCHAR(100) DEFAULT 'India',
+  PostalCode VARCHAR(20),
+  Phone VARCHAR(20),
+  
+  IsDeleted TINYINT(1) DEFAULT 0,
+
+  IsDefault BOOLEAN DEFAULT 0,
+
+  CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+  FOREIGN KEY (UserID) REFERENCES user(UserID) ON DELETE CASCADE
+);
+
+
+testimonials:-
+CREATE TABLE `jelwo`.`testimonials` (
+  `testimonial_id` INT NOT NULL AUTO_INCREMENT,
+  `testimonial_name` VARCHAR(100) NOT NULL,
+  `testimonial_role` VARCHAR(100) NOT NULL,
+  `testimonial_review` TEXT NOT NULL,
+  `testimonial_rating` INT NOT NULL,
+  `testimonial_image` VARCHAR(255) NOT NULL,
+  PRIMARY KEY (`testimonial_id`));
+
+team:-
+CREATE TABLE `jelwo`.`team` (
+  `team_id` INT NOT NULL AUTO_INCREMENT,
+  `team_name` VARCHAR(100) NOT NULL,
+  `team_role` VARCHAR(100) NOT NULL,
+  `team_image` VARCHAR(255) NOT NULL,
+  PRIMARY KEY (`team_id`));
+
+contact:-
+CREATE TABLE contact_messages (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  full_name VARCHAR(100) NOT NULL,
+  email VARCHAR(100) NOT NULL,
+  mobile VARCHAR(20),
+  message TEXT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);
+
+product:-
+CREATE TABLE `jelwo`.`products` (
+  `prod_id` INT NOT NULL AUTO_INCREMENT,
+  `prod_title` VARCHAR(225) NOT NULL,
+  `prod_category` VARCHAR(100) NULL,
+  `prod_price` DECIMAL(10,2) NOT NULL,
+  `prod_oldprice` DECIMAL(10,2) NULL,
+  `prod_discount` VARCHAR(20) NULL,
+  `prod_image` VARCHAR(255) NOT NULL,
+  `prod_stock` INT NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`prod_id`));
+
+blog:-
+CREATE TABLE `jelwo`.`blog` (
+  `blog_id` INT NOT NULL AUTO_INCREMENT,
+  `blog_image` VARCHAR(255) NOT NULL,
+  `blog_title` VARCHAR(255) NOT NULL,
+  `blog_author` VARCHAR(100) NOT NULL,
+  `blog_date` VARCHAR(100) NOT NULL,
+  `blog_description` TEXT NOT NULL,
+  `blog_subimage1` VARCHAR(255) NOT NULL,
+  `blog_subimage2` VARCHAR(255) NOT NULL,
+  `blog_submessage` TEXT NOT NULL,
+  `blog_subdescription` TEXT NOT NULL,
+  `blog_tags` VARCHAR(255) NOT NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`blog_id`));
+
+comments:-
+CREATE TABLE `jelwo`.`comments` (
+  `comment_id` INT NOT NULL AUTO_INCREMENT,
+  `blog_id` INT NOT NULL,
+  `name` VARCHAR(100) NOT NULL,
+  `email` VARCHAR(150) NOT NULL,
+  `message` TEXT NOT NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+  PRIMARY KEY (`comment_id`),
+  CONSTRAINT `fk_comments_blog`
+    FOREIGN KEY (`blog_id`)
+    REFERENCES `blog`(`blog_id`)
+    ON DELETE CASCADE
+);
+
+reels:-
+CREATE TABLE reels (
+  ReelID INT AUTO_INCREMENT PRIMARY KEY,
+  ReelTitle VARCHAR(255) NOT NULL,
+  ReelVideo VARCHAR(255) NOT NULL,
+  ReelThumb VARCHAR(255) NOT NULL,
+  ProductID INT NOT NULL,
+  IsDeleted TINYINT DEFAULT 0,
+  CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+  FOREIGN KEY (ProductID) REFERENCES products(prod_id)
+);
+
+faqs:-
+CREATE TABLE faqs (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  category VARCHAR(100) NOT NULL,
+  question TEXT NOT NULL,
+  answer TEXT NOT NULL,
+  is_active TINYINT DEFAULT 1,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+subscribes:-
+CREATE TABLE subscribers (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  email VARCHAR(255) NOT NULL UNIQUE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+wishlist:-
+CREATE TABLE wishlist (
+  WishlistID INT AUTO_INCREMENT PRIMARY KEY,
+  UserID INT NOT NULL,
+  ProductID INT NOT NULL,
+  IsDeleted TINYINT(1) DEFAULT 0,
+  CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+  UNIQUE KEY unique_user_product (UserID, ProductID),
+
+  FOREIGN KEY (UserID) REFERENCES user(UserID) ON DELETE CASCADE,
+  FOREIGN KEY (ProductID) REFERENCES products(prod_id) ON DELETE CASCADE
+);
+
+cart:-
+CREATE TABLE cart (
+  CartID INT AUTO_INCREMENT PRIMARY KEY,
+  UserID INT NOT NULL,
+  ProductID INT NOT NULL,
+  Quantity INT DEFAULT 1,
+  IsDeleted TINYINT(1) DEFAULT 0,
+  CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+  UNIQUE KEY unique_user_product (UserID, ProductID),
+
+  FOREIGN KEY (UserID) REFERENCES user(UserID) ON DELETE CASCADE,
+  FOREIGN KEY (ProductID) REFERENCES products(prod_id) ON DELETE CASCADE
+);
+
+orders:-
+CREATE TABLE orders (
+  OrderID INT AUTO_INCREMENT PRIMARY KEY,
+
+  UserID INT NOT NULL,
+  AddressID INT NOT NULL,
+
+  Subtotal DECIMAL(10,2) NOT NULL,
+  Shipping DECIMAL(10,2) NOT NULL,
+  TotalAmount DECIMAL(10,2) NOT NULL,
+
+  OrderStatus VARCHAR(50) DEFAULT 'Pending',
+
+  CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+  FOREIGN KEY (UserID) REFERENCES user(UserID) ON DELETE CASCADE,
+  FOREIGN KEY (AddressID) REFERENCES address(AddressID) ON DELETE CASCADE
+);
+
+order_items:-
+CREATE TABLE order_items (
+  OrderItemID INT AUTO_INCREMENT PRIMARY KEY,
+
+  OrderID INT NOT NULL,
+  ProductID INT NOT NULL,
+
+  Price DECIMAL(10,2) NOT NULL,
+  Quantity INT NOT NULL,
+
+  FOREIGN KEY (OrderID) REFERENCES orders(OrderID) ON DELETE CASCADE,
+  FOREIGN KEY (ProductID) REFERENCES products(prod_id) ON DELETE CASCADE
+);
+
+payments:-
+CREATE TABLE payments (
+  PaymentID INT AUTO_INCREMENT PRIMARY KEY,
+  OrderID INT,
+  UserID INT,
+  PaymentMethod VARCHAR(50),
+  CardLast4 VARCHAR(4),
+  Amount DECIMAL(10,2),
+  PaymentStatus VARCHAR(20) DEFAULT 'Paid',
+  CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (OrderID) REFERENCES orders(OrderID),
+  FOREIGN KEY (UserID) REFERENCES user(UserID)
+);
